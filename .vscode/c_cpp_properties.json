@@ -1,0 +1,17 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/pparekh/osu-uwrt/eddy_software/devel/include",
+        "/home/pparekh/osu-uwrt/riptide_software/devel/include",
+        "/opt/ros/kinetic/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}

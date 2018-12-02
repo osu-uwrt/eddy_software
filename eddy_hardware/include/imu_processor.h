@@ -4,3 +4,9 @@
 #include "ros/ros.h"
 
 using namespace std;
+
+class IMUProcessor{
+
+    private:
+    public: 
+}
