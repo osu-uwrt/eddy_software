@@ -1,6 +1,6 @@
-#include "eddy_hardware/calibratecamera.h"
-#include <fstream>
-//using namespace cv;
+#include "eddy_hardware/calibrate_camera.h"
+
+
 static const int WIDTH = 960;
 static const int HEIGHT = 600;
 static const std::string WIN_ORIGINAL = "Original Image";
@@ -87,7 +87,7 @@ void CalibrateCamera::ImageCB(const sensor_msgs::Image::ConstPtr &msg) {
         }
         imshow(WIN_ORIGINAL, cv_ptr-> image);
         imshow(WIN_CHECKERBOARD, gray_image);
-        waitkey(1);
+        waitKey(1);
 
         if(pauses == 0){
           image_points.push_back(corners);
@@ -98,36 +98,16 @@ void CalibrateCamera::ImageCB(const sensor_msgs::Image::ConstPtr &msg) {
     }
     //calc coeefficients time
     if(successes>numBoards && !calculated){
-      ofstream output;
+      ROS_INFO("Object_Points: %li " , object_points.size());
+      ROS_INFO("image_points: %li " , image_points.size());
       ROS_INFO("Calibrating..");
+      
       calibrateCamera(object_points, image_points, cv_ptr->image.size(), cameraMatrix, distortionCoeffs, rvecs, tvecs);
-      ROS_INFO("Calibrated standby for coefficients:")
-      std::cout << "cameraMatrix:" << endl << cameraMatrix << endl << endl;
-      std::cout << "Distortion Coeffs:" << endl << distortionCoeffs<< endl << endl;
+      ROS_INFO("Calibrated standby for coefficients:");
+      cout << "cameraMatrix:" << endl << cameraMatrix << endl << endl;
+      cout << "Distortion Coeffs:" << endl << distortionCoeffs<< endl << endl;
 
-      ofstream.open("cfg/" + camera_name + "_cal.yaml");
-
-      output << "cameraMatrix:" << endl;
-      output << " R0: #Row 0" << endl;
-      output << "   C0: " << cameraMatrix.ptr<double>(0)[0]) << endl;
-      output << "   C1: " << cameraMatrix.ptr<double>(0)[1]) << endl;
-      output << "   C2: " << cameraMatrix.ptr<double>(0)[2]) << endl;
-      output << " R1: #Row 1" << endl;
-      output << "   C0: " << cameraMatrix.ptr<double>(1)[0]) << endl;
-      output << "   C1: " << cameraMatrix.ptr<double>(1)[1]) << endl;
-      output << "   C2: " << cameraMatrix.ptr<double>(1)[2]) << endl;
-      output << " R2: #Row 2" << endl;
-      output << "   C0: " << cameraMatrix.ptr<double>(2)[0]) << endl;
-      output << "   C1: " << cameraMatrix.ptr<double>(2)[1]) << endl;
-      output << "   C2: " << cameraMatrix.ptr<double>(2)[2]) << endl; 
-      output << "distortionCoeffs:" << endl;
-      output << " C0: " << distortionCoeffs.ptr<double>(0)[0]) << endl;
-      output << " C1: " << distortionCoeffs.ptr<double>(0)[1]) << endl;
-      output << " C2: " << distortionCoeffs.ptr<double>(0)[2]) << endl;
-      output << " C3: " << distortionCoeffs.ptr<double>(0)[3]) << endl;
-      output << " C4: " << distortionCoeffs.ptr<double>(0)[4]) << endl;
-
-      output.close();
+      
 
       ROS_INFO("cameraMatrix [0][0] %.8f", cameraMatrix.ptr<double>(0)[0]);
       ROS_INFO("cameraMatrix [0][1] %.8f", cameraMatrix.ptr<double>(0)[1]);
@@ -151,20 +131,51 @@ void CalibrateCamera::ImageCB(const sensor_msgs::Image::ConstPtr &msg) {
 
       destroyWindow(WIN_CHECKERBOARD);
       namedWindow(WIN_UNDISTORTED, WINDOW_NORMAL);
-      resizeWindow(WIn)
+      resizeWindow(WIN_UNDISTORTED, WIDTH, HEIGHT);
     }
 
     if(calculated) {
     Mat imageUndistorted;
     ros::Time time_start = ros::Time::now();
     undistort(cv_ptr->image, imageUndistorted, cameraMatrix, distortionCoeffs);
+
+   
     ROS_INFO("undistorted image in %f s", (ros::Time::now() - time_start).toSec());
 
     sensor_msgs::ImagePtr out_msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", imageUndistorted).toImageMsg();
 
     imshow(WIN_ORIGINAL, cv_ptr->image);
     imshow(WIN_UNDISTORTED, imageUndistorted);
-    waitKey(1);
+    ROS_INFO("Press y key to accept or any other key to decline");
+    if(waitKey(0) == 89){
+    ofstream output;
+    output.open("cfg/" + camera_name + "_cal.yaml");
+
+    output << "cameraMatrix:" << endl;
+    output << " R0: #Row 0" << endl;
+    output << "   C0: " << cameraMatrix.ptr<double>(0)[0] << endl;
+    output << "   C1: " << cameraMatrix.ptr<double>(0)[1] << endl;
+    output << "   C2: " << cameraMatrix.ptr<double>(0)[2] << endl;
+    output << " R1: #Row 1" << endl;
+    output << "   C0: " << cameraMatrix.ptr<double>(1)[0] << endl;
+    output << "   C1: " << cameraMatrix.ptr<double>(1)[1] << endl;
+    output << "   C2: " << cameraMatrix.ptr<double>(1)[2] << endl;
+    output << " R2: #Row 2" << endl;
+    output << "   C0: " << cameraMatrix.ptr<double>(2)[0] << endl;
+    output << "   C1: " << cameraMatrix.ptr<double>(2)[1] << endl;
+    output << "   C2: " << cameraMatrix.ptr<double>(2)[2] << endl; 
+    output << "distortionCoeffs:" << endl;
+    output << " C0: " << distortionCoeffs.ptr<double>(0)[0] << endl;
+    output << " C1: " << distortionCoeffs.ptr<double>(0)[1] << endl;
+    output << " C2: " << distortionCoeffs.ptr<double>(0)[2] << endl;
+    output << " C3: " << distortionCoeffs.ptr<double>(0)[3] << endl;
+    output << " C4: " << distortionCoeffs.ptr<double>(0)[4] << endl;
+
+    output.close();
+    } else{
+      
+    }
+    waitKey(0);
   }
 
   cv_ptr.reset();
