@@ -1,13 +1,15 @@
 #include "eddy_hardware/depth_processor.h"
 
-int main (int argc, char** argv) {
+#define PI 3.14159
+
+int main(int argc, char** argv) {
     ros::init(argc, argv, "depth_processor");
     DepthProcessor DP;
     DP.Loop();
 }
 
 // Constructor
-DepthProcessor::DepthProcessor():
+DepthProcessor::DepthProcessor() : nh("depth_processor") {
  depth_sub = nh.subscribe<eddy_msgs::depth>("/depth/raw", 1, &DepthProcessor::DepthCB, this);
  depth_pub = nh.advertise<eddy_msgs::depth>("/state/depth", 1);
  DepthProcessor::LoadParam<double>("post_IIR_LPF_bandwidth", post_IIR_LPF_bandwidth);
@@ -42,12 +44,12 @@ void DepthProcessor::SmoothDataIIR() {
 }
 
 
-void DepthProcessor::DepthCB(const riptide_msgs::Depth::ConstPtr& depth_msg) {
-  DepthMsg.header = DepthMsg -> header;
-  DepthMsg.depth = DepthMsg -> depth;
-  DepthMsg.pressure = DepthMsg -> pressure;
-  DepthMsg.temp = DepthMsg -> temp;
-  DepthMsg.altitude = DepthMsg -> altitude;
+void DepthProcessor::DepthCB(const eddy_msgs::depth::ConstPtr& depth_msg) {
+  DepthMsg.header = depth_msg->header;
+  DepthMsg.depth = depth_msg->depth;
+  DepthMsg.pressure = depth_msg->pressure;
+  DepthMsg.temp = depth_msg->temp;
+  DepthMsg.altitude = depth_msg->altitude;
   DepthProcessor::SmoothDataIIR();
 
   // Publish the up-to-date data to DepthMsg
