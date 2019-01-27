@@ -36,9 +36,9 @@ roslint_cpp()
 find_package(Boost REQUIRED)
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 
-# add_executable(depth_processor src/depth_processor.cpp)
-# target_link_libraries(depth_processor ${catkin_LIBRARIES})
-# add_dependencies(depth_processor ${catkin_EXPORTED_TARGETS})
+add_executable(depth_processor src/depth_processor.cpp)
+target_link_libraries(depth_processor ${catkin_LIBRARIES})
+add_dependencies(depth_processor ${catkin_EXPORTED_TARGETS})
 
 add_executable(calibrate_camera src/calibrate_camera.cpp)
 target_link_libraries(calibrate_camera ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
